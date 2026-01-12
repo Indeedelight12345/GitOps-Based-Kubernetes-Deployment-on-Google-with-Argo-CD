@@ -1,0 +1,5 @@
+{
+  "name": "Crypto-Pulse Micro Trading",
+  "description": "A sleek and responsive micro-trading application interface, inspired by platforms like Binance. It features a mock real-time market data feed, interactive price charts, and a simulated trading panel to practice buying and selling cryptocurrencies.",
+  "requestFramePermissions": []
+}
