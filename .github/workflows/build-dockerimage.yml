@@ -4,6 +4,10 @@ on:
   release:
     types: [created]
 
+  push:
+    tags:
+      - "v*"
+
 env:
   DOCKER_BUILDKIT: 1
   IMAGE_NAME: mycryptobot-app
