@@ -7,7 +7,7 @@ spec:
   type: NodePort
   selector:
     app: mycryptobot
-    color: blue
+    color: green
   ports:
     - port: 80
       targetPort: 80
