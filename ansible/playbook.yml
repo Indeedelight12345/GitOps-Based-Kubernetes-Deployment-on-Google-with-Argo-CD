@@ -1,0 +1,45 @@
+---
+- name: Prepare Kubernetes nodes
+  hosts: k8s
+  become: yes
+  vars:
+    kube_user: ubuntu
+
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install required system packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add user to docker group
+      user:
+        name: "{{ kube_user }}"
+        groups: docker
+        append: yes
+
+    - name: Allow passwordless sudo for user
+      copy:
+        dest: "/etc/sudoers.d/{{ kube_user }}"
+        content: "{{ kube_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
