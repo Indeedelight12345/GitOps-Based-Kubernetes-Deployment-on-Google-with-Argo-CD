@@ -1,9 +1,0 @@
-# manifest/fleet.yaml
-# Tells Fleet to deploy everything in this folder
-apiVersion: fleet.cattle.io/v1alpha1
-kind: GitRepo
-metadata:
-  name: myclone-netflix-app
-spec:
-  paths:
-    - .
