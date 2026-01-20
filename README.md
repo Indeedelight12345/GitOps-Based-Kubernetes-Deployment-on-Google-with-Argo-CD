@@ -94,8 +94,57 @@ This project solves common pain points:
 *  install-kubernetes.yml Add Kubernetes repos, install kubeadm/kubelet/kubectl, disable swap, configure sysctl.
 *  run ansible playbook to install  docker and kubernates
 ```
-ansible-playbook -i hosts.ini install-docker.yml
-ansible-playbook -i hosts.ini install-kubernetes.yml
+ansible-playbook -i invnetory.ini playbook.yml
+ansible-playbook -i invnetory.ini cluster.yml
+```
+### Ansible playbook 
+```
+---
+- name: Prepare Kubernetes nodes
+  hosts: k8s
+  become: yes
+  vars:
+    kube_user: ubuntu
+
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install required system packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add user to docker group
+      user:
+        name: "{{ kube_user }}"
+        groups: docker
+        append: yes
+
+    - name: Allow passwordless sudo for user
+      copy:
+        dest: "/etc/sudoers.d/{{ kube_user }}"
+        content: "{{ kube_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
+
 ```
 ### Bootstrap Kubernetes Cluster with kubeadm
 ```
@@ -144,3 +193,55 @@ jobs:
           push: true
           tags: yourusername/myapp:latest
 ```
+### Argocd  installtion 
+* install argocd   for continous deployment
+```
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+### Create blue-green Application in Git repo
+* create a yaml file  for deployment
+*  ensure the docker image   and tag is correct
+  ```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: myapp
+  labels:
+    app: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: rukevweubio/<your-image-name>:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+  namespace: default
+spec:
+  selector:
+    app: my-app
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+
+```
+
