@@ -1,9 +1,6 @@
 
 # Project: GitOps Kubernetes Cluster on Google Cloud with Terraform, Ansible, Linkerd, ArgoCD & Blue-Green Deployments
 
-**Author:** Rukevwe  
-**Project Type:** Advanced Kubernetes / GitOps / Infrastructure as Code / Service Mesh  
-**Date:** January 2026
 
 ## 1. Project Overview & Motivation
 
@@ -42,46 +39,14 @@ This project solves common pain points:
 - **CI/CD**: GitHub Actions → build Docker image → push to Docker Hub.
 - **GitOps CD**: ArgoCD syncs manifests from Git → deploys application with blue-green strategy.
 
-<grok-card data-id="ff3d02" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
 
-
-
-<grok-card data-id="466511" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
-
-
-
-<grok-card data-id="b95aa6" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
 
 
 (Terraform + GCP architecture visuals)
 
-<grok-card data-id="b33206" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
 
 
 
-<grok-card data-id="3b0d9d" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
-
-
-(Kubernetes kubeadm cluster topology examples)
-
-<grok-card data-id="a507e2" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
-
-
-
-<grok-card data-id="947e61" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
-
-
-(Linkerd service mesh architecture)
-
-<grok-card data-id="b4bb34" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
-
-
-
-<grok-card data-id="4161d6" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
-
-
-
-<grok-card data-id="19f306" data-type="image_card"  data-arg-size="LARGE" ></grok-card>
 
 
 (ArgoCD blue-green deployment workflows)
@@ -117,3 +82,41 @@ This project solves common pain points:
    terraform init
    terraform plan
    terraform apply
+
+### Ansible Automation – Install Docker & Kubernetes
+*  create Ansible inventory hosts.ini file  with master & worker IPs.
+*  create  playbook to install docker  in both vm
+*  install-docker.yml: Install Docker + containerd.
+*  install-kubernetes.yml Add Kubernetes repos, install kubeadm/kubelet/kubectl, disable swap, configure sysctl.
+*  run ansible playbook to install  docker and kubernates
+```
+ansible-playbook -i hosts.ini install-docker.yml
+ansible-playbook -i hosts.ini install-kubernetes.yml
+```
+### Bootstrap Kubernetes Cluster with kubeadm
+```
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# install falnnel for network
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+```
+### Get join command from output → run on worker
+```
+sudo kubeadm join <master-ip>:6443 --token ... --discovery-token-ca-cert-hash ...
+kubectl get nodes
+```
+### Install Linkerd Service Mesh
+* linkerd  is used to monitor the network
+```
+linkerd install --crds | kubectl apply -f -
+linkerd install | kubectl apply -f -
+linkerd check
+```
+### Enable mTLS & visualization
+```
+linkerd viz install | kubectl apply -f -
+linkerd viz dashboard &
+```
+
