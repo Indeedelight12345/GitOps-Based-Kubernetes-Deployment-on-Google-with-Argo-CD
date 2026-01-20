@@ -251,3 +251,5 @@ spec:
 
 ```
 
+![argocd   deployment](https://github.com/Indeedelight12345/GitOps-Based-Kubernetes-Deployment-on-Google-with-Argo-CD/blob/main/picture/Screenshot%202026-01-09%20at%2019.32.59.png)
+
