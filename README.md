@@ -39,6 +39,8 @@ This project solves common pain points:
 - **CI/CD**: GitHub Actions → build Docker image → push to Docker Hub.
 - **GitOps CD**: ArgoCD syncs manifests from Git → deploys application with blue-green strategy.
 
+![architecture diagram](https://miro.medium.com/v2/resize:fit:1200/1*BqhBVtvV8233x6WdlaLOeQ.png)
+
 
 
 
@@ -61,6 +63,8 @@ This project solves common pain points:
 - **GitOps/CD**: ArgoCD
 - **CI**: GitHub Actions
 - **Registry**: Docker Hub
+
+![argocd deployment](https://miro.medium.com/0*oAhSBvre5APnKyGo)
 
 ## 4. Step-by-Step Implementation
 
@@ -119,4 +123,24 @@ linkerd check
 linkerd viz install | kubectl apply -f -
 linkerd viz dashboard &
 ```
+### CI/CD with GitHub Actions & ArgoCD
+* install argocd  on teh   cluster
+*  create a file GitHub Actions workflow (.github/workflows/build-push.yml):
+*   build Docker image, push to Docker Hub.
 
+  
+```
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }} 
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: yourusername/myapp:latest
+```
